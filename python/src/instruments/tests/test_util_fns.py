@@ -31,7 +31,8 @@ from nose.tools import raises, eq_
 
 from instruments.util_fns import (
     ProxyList,
-    assume_units, bool_property, enum_property, int_property
+    assume_units, bool_property, enum_property, int_property,
+    unitless_property, unitful_property, string_property
 )
 
 from flufl.enum import Enum
@@ -148,12 +149,61 @@ def test_enum_property():
     mock.c = 1
     mock.d = SillyIntEnum.c
     
+    # Test that thw whole history was correct.
     eq_(mock.value,
         'MOCK:A?\nMOCK:B?\nMOCK:A bb\nMOCK:B aa\nMOCK:B bb\n'
         'MOCK:C?\nMOCK:D?\nMOCK:C 1\nMOCK:D 0\n'
     )
 
-# TODO: test other property factories!
+def test_unitless_property():
+    class UnitlessMock(MockInstrument):
+        a = unitless_property("MOCK:A")
+        b = unitless_property("MOCK:B", "{:0.1f}")
+
+    mock = UnitlessMock({"MOCK:A?": "42", "MOCK:B?": "42.0"})
+
+    eq_(mock.a, 42)
+    eq_(mock.b, 42.0)
+
+    mock.b = 12.3
+
+    eq_(mock.value,
+        'MOCK:A?\nMOCK:B?\nMOCK:B 12.3\n'
+    )
+
+def test_unitful_property_valid():
+    class UnitfulMock(MockInstrument):
+        a = unitful_property("MOCK:A", pq.ms, "{:.0f}")
+
+    mock = UnitfulMock({"MOCK:A?": "100"})
+
+    eq_(mock.a, 0.1 * pq.s)
+
+    mock.a = 1 * pq.s
+
+    eq_(mock.value, "MOCK:A?\nMOCK:A 1000\n")
+
+
+@raises(ValueError)
+def test_unitful_property_invalid():
+    class UnitfulMock(MockInstrument):
+        a = unitful_property("MOCK:A", pq.ms, "{:.0f}")
+
+    mock = UnitfulMock({"MOCK:A?": "100"})
+
+    mock.a = 10 * pq.m
+
+def test_string_property():
+    class StringMock(MockInstrument):
+        a = string_property("MOCK:A")
+
+    mock = StringMock({"MOCK:A?": '"foobar"'})
+
+    eq_(mock.a, "foobar")
+
+    mock.a = "snafu"
+
+    eq_(mock.value, 'MOCK:A?\nMOCK:A "snafu"\n')
 
 @raises(ValueError)
 def test_int_property_valid_set():
