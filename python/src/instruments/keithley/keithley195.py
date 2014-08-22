@@ -61,13 +61,13 @@ class Keithley195(Multimeter):
         self.sendcmd('G1DX') # Disable returning prefix and suffix
 
     ## ENUMS ##
-    
-    class Mode(IntEnum):
-        voltage_dc = 0
-        voltage_ac = 1
-        resistance = 2
-        current_dc = 3
-        current_ac = 4
+
+    class Mode(Enum):
+        voltage_dc = (0, pq.volt)
+        voltage_ac = (1, pq.volt)
+        resistance = (2, pq.ohm)
+        current_dc = (3, pq.amp)
+        current_ac = (4, pq.amp)
         
     class TriggerMode(IntEnum):
         talk_continuous = 0
@@ -200,13 +200,14 @@ class Keithley195(Multimeter):
         :rtype: `~quantities.quantity.Quantity` or `str`
         """
         index = self.parse_status_word(self.get_status_word())['range']
+
         if index == 0:
             return 'auto'
         else:
             mode = self.mode
-            value = Keithley195.ValidRange[mode.name].value[index-1]
-            units = UNITS2[mode]
+            idx_mode, units = Keithley195.ValidRange[mode.name].value[index - 1]
             return value * units
+
     @input_range.setter
     def input_range(self, newval):
         if isinstance(newval, str):
@@ -269,9 +270,10 @@ class Keithley195(Multimeter):
                 self.mode = mode
                 time.sleep(2) # Gives the instrument a moment to settle
         else:
-            mode = self.mode
+            idx_mode, units = self.mode
+            
         value = self.query('')
-        return float(value) * UNITS2[mode]
+        return float(value) * units
         
     def get_status_word(self):
         """
@@ -352,11 +354,3 @@ UNITS = {
     'OHM':  pq.ohm,
 }            
         
-UNITS2 = {
-    Keithley195.Mode.voltage_dc:  pq.volt,
-    Keithley195.Mode.voltage_ac:  pq.volt,
-    Keithley195.Mode.current_dc:  pq.amp,
-    Keithley195.Mode.current_ac:  pq.amp,
-    Keithley195.Mode.resistance:  pq.ohm,
-}
-

@@ -28,6 +28,8 @@ from __future__ import division
 
 ## IMPORTS #####################################################################
 
+from six.moves import xrange
+
 import math
 import time
 
@@ -38,9 +40,14 @@ from flufl.enum import IntEnum
 from flufl.enum._enum import EnumValue
 import quantities as pq
 
+from instruments._exceptions import InstrumentWarning
 from instruments.generic_scpi import SCPIInstrument
 from instruments.abstract_instruments.comm import GPIBWrapper, SerialWrapper
 from instruments.util_fns import assume_units
+
+import warnings
+import logging
+logger = logging.getLogger(__name__)
 
 ## CONSTANTS ###################################################################
 
@@ -80,8 +87,8 @@ class SRS830(SCPIInstrument):
             elif isinstance(self._file, SerialWrapper):
                 self.sendcmd('OUTX 2')
             else:
-                print 'OUTX command has not been set. Instrument behavour is '\
-                        'unknown.'
+                warnings.warn('OUTX command has not been set. Instrument behavour is '\
+                        'unknown.', InstrumentWarning)
     ## ENUMS ##
     
     class FreqSource(IntEnum):
@@ -401,7 +408,7 @@ class SRS830(SCPIInstrument):
         self.init(sample_rate, SRS830.BufferMode['one_shot'])
         self.start_data_transfer()
         
-        print 'Sampling will take {} seconds.'.format(sample_time)
+        logger.info('Sampling will take {} seconds.'.format(sample_time))
         time.sleep(sample_time+0.1)  
         
         self.pause()

@@ -24,8 +24,9 @@
 
 ## IMPORTS ####################################################################
 
+import six
 import contextlib
-import cStringIO as StringIO
+from six.moves import StringIO
 
 from nose.tools import nottest, eq_
 
@@ -41,8 +42,8 @@ def expected_protocol(ins_class, host_to_ins, ins_to_host):
     For an example of how to write tests using this context manager, see
     the ``make_name_test`` function below.
     """
-    stdin = StringIO.StringIO(ins_to_host)
-    stdout = StringIO.StringIO()
+    stdin = StringIO(ins_to_host)
+    stdout = StringIO()
     
     yield ins_class.open_test(stdin, stdout)
     

@@ -31,6 +31,7 @@ from __future__ import division
 from time import time, sleep
 
 import datetime
+import warnings
 
 from flufl.enum import IntEnum
 
@@ -38,6 +39,7 @@ from contextlib import contextmanager
 
 import quantities as pq
 
+from instruments._exceptions import InstrumentWarning
 from instruments.abstract_instruments import Instrument
 from instruments.newport.errors import NewportError
 from instruments.util_fns import assume_units
@@ -1044,8 +1046,9 @@ class NewportESP301Axis(object):
         """
         try:
             self._controller._newport_cmd("ST",target=self.axis_id)
-        except NewportError, e:
-            print e
+        except NewportError as e:
+            # Downgrade NewportErrors in this method to InstrumentWarnings
+            warnings.warn(e.msg, InstrumentWarning)
 
     def wait_for_position(self,position):
         """

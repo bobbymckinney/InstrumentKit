@@ -25,7 +25,7 @@
 ## IMPORTS ####################################################################
 
 import quantities as pq
-from cStringIO import StringIO
+from six.moves import StringIO, xrange
 
 from nose.tools import raises, eq_
 

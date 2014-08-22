@@ -39,6 +39,8 @@ from instruments.util_fns import assume_units
 
 from instruments.units import dBm
 
+import six
+
 ## ENUMS #######################################################################
 
 class SRS345Function(Enum):
@@ -65,7 +67,7 @@ class SRS345(SCPIInstrument, FunctionGenerator):
         FunctionGenerator.VoltageMode.dBm:          "DB",
     }
     
-    _MNEMONIC_UNITS = dict((mnem, unit) for unit, mnem in _UNIT_MNEMONICS.iteritems())
+    _MNEMONIC_UNITS = dict((mnem, unit) for unit, mnem in six.iteritems(_UNIT_MNEMONICS))
     
     ## FunctionGenerator CONTRACT ##
     

@@ -53,6 +53,8 @@ __check_versions()
 
 ## IMPORTS ####################################################################
 
+from instruments._exceptions import *
+
 from instruments.abstract_instruments import Instrument
 import instruments.abstract_instruments
 
