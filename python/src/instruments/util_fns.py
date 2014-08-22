@@ -31,7 +31,8 @@ from __future__ import division
 import sys
 
 import quantities as pq
-from flufl.enum import Enum, IntEnum
+from flufl.enum import Enum
+from instruments._moves import IntEnum
 
 ## FUNCTIONS ###################################################################
 
@@ -103,6 +104,9 @@ def enum_property(name, enum, doc=None, input_decoration=None, output_decoration
     :param bool readonly: If `True`, the returned property does not have a
         setter.
     """
+    if IntEnum in enum.__bases__ and input_decoration is None:
+        input_decoration = int
+
     def in_decor_fcn(val):
         return val if input_decoration is None else input_decoration(val)
     def out_decor_fcn(val):

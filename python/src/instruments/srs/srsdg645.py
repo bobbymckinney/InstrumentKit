@@ -32,7 +32,7 @@ import six
 
 from time import time, sleep
 
-import flufl.enum
+from instruments._moves import IntEnum
 from flufl.enum._enum import EnumValue
 
 from contextlib import contextmanager
@@ -42,16 +42,6 @@ import quantities as pq
 from instruments.generic_scpi import SCPIInstrument
 from instruments.abstract_instruments.comm import GPIBWrapper
 from instruments.util_fns import assume_units, ProxyList
-
-## PY2/3 COMPAT ################################################################
-
-if six.PY2:
-    IntEnum = flufl.enum.IntEnum
-elif six.PY3:
-    IntEnum = flufl.enum.Enum
-else:
-    assert False, "this should never happen."
-
 
 ## CLASSES #####################################################################
 

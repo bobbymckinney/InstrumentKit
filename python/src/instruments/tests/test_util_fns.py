@@ -35,6 +35,7 @@ from instruments.util_fns import (
 )
 
 from flufl.enum import Enum
+from instruments._moves import IntEnum
 
 ## CLASSES ####################################################################
 
@@ -116,12 +117,22 @@ def test_enum_property():
     class SillyEnum(Enum):
         a = 'aa'
         b = 'bb'
+
+    class SillyIntEnum(IntEnum):
+        c = 0
+        d = 1
         
     class EnumMock(MockInstrument):
         a = enum_property('MOCK:A', SillyEnum)
         b = enum_property('MOCK:B', SillyEnum)
+
+        c = enum_property('MOCK:C', SillyIntEnum)
+        d = enum_property('MOCK:D', SillyIntEnum)
         
-    mock = EnumMock({'MOCK:A?': 'aa', 'MOCK:B?': 'bb'})
+    mock = EnumMock({
+        'MOCK:A?': 'aa', 'MOCK:B?': 'bb',
+        'MOCK:C?': '0',  'MOCK:D?': '1'   
+    })
     
     assert mock.a is SillyEnum.a
     assert mock.b is SillyEnum.b
@@ -130,8 +141,17 @@ def test_enum_property():
     mock.a = SillyEnum.b
     mock.b = 'a'
     mock.b = 'bb'
+
+    eq_(mock.c, SillyIntEnum.c)
+    eq_(mock.d, SillyIntEnum.d)
+
+    mock.c = 1
+    mock.d = SillyIntEnum.c
     
-    eq_(mock.value, 'MOCK:A?\nMOCK:B?\nMOCK:A bb\nMOCK:B aa\nMOCK:B bb\n')
+    eq_(mock.value,
+        'MOCK:A?\nMOCK:B?\nMOCK:A bb\nMOCK:B aa\nMOCK:B bb\n'
+        'MOCK:C?\nMOCK:D?\nMOCK:C 1\nMOCK:D 0\n'
+    )
 
 # TODO: test other property factories!
 
