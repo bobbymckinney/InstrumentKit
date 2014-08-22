@@ -39,6 +39,8 @@ from instruments.util_fns import assume_units
 
 from instruments.units import dBm
 
+import six
+
 ## CLASSES #####################################################################
 
 class SCPIFunctionGenerator(FunctionGenerator, SCPIInstrument):
@@ -52,7 +54,7 @@ class SCPIFunctionGenerator(FunctionGenerator, SCPIInstrument):
         FunctionGenerator.VoltageMode.dBm:          "DBM",
     }
     
-    _MNEMONIC_UNITS = dict((mnem, unit) for unit, mnem in _UNIT_MNEMONICS.iteritems())
+    _MNEMONIC_UNITS = dict((mnem, unit) for unit, mnem in six.iteritems(_UNIT_MNEMONICS))
     
     ## FunctionGenerator CONTRACT ##
     

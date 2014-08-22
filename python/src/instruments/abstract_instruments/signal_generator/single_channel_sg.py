@@ -31,8 +31,8 @@ from __future__ import division
 import abc
 
 from instruments.abstract_instruments import Instrument
-from signal_generator import SignalGenerator
-from channel import SGChannel
+from .signal_generator import SignalGenerator
+from .channel import SGChannel
 from instruments.util_fns import ProxyList
 
 ## CLASSES #####################################################################

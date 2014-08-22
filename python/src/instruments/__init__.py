@@ -29,6 +29,10 @@
 
 __version__ = '1.0a1'
 
+## 2/3 COMPATABILITY ##########################################################
+
+import six
+
 ## VERSION CHECKING ###########################################################
 
 # We hide version checking in a function so that imports from here don't
@@ -40,7 +44,7 @@ def __check_versions():
         'flufl.enum': StrictVersion('4.0')
     }
     
-    for module_name, version in VERSIONS_NEEDED.iteritems():
+    for module_name, version in six.iteritems(VERSIONS_NEEDED):
         module = __import__(module_name, fromlist=['__version__'])
         if StrictVersion(module.__version__) < version:
             raise ImportError("Module {} is version {}, but we need version {}.".format(module_name, module.__version__, version))

@@ -29,7 +29,7 @@ import serial
 import time
 import struct
 import socket
-import urlparse
+from six.moves.urllib import parse as urlparse
 
 from instruments.abstract_instruments.comm import (
     SocketWrapper,
@@ -56,7 +56,8 @@ except ImportError:
 try:
     WindowsError
 except NameError:
-    WindowsError = None
+    class WindowsError(BaseException):
+        pass
 try:
     import visa
 except (ImportError, WindowsError, OSError):
@@ -192,9 +193,9 @@ class Instrument(object):
             or `None` to choose a format automatically based on the data
             width.        
         '''
-        if(data_width not in [1,2]):
-            print 'Error: Data width must be 1 or 2.'
-            return 0
+        if data_width not in [1,2]:
+            raise ValueError('Requested data width was {0}, but must be 1 or 2.'.format(data_width))
+
         # This needs to be a # symbol for valid binary block
         symbol = self._file.read(1)
         if(symbol != '#'): # Check to make sure block is valid

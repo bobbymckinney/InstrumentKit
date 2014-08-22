@@ -22,7 +22,10 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
-##
+
+## FEATURES ####################################################################
+
+from __future__ import print_function
 
 ## IMPORTS #####################################################################
 
@@ -96,7 +99,7 @@ class LoopbackWrapper(io.IOBase, AbstractCommunicator):
         if self._stdout is not None:
             self._stdout.write(msg)
         else:
-            print " <- {} ".format(repr(msg))
+            print(" <- {} ".format(repr(msg)))
         
         
     def seek(self, offset):

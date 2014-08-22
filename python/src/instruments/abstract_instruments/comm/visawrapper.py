@@ -31,7 +31,8 @@ import io
 try:
     WindowsError
 except NameError:
-    WindowsError = None
+    class WindowsError(BaseException):
+        pass
 try:
     import visa
 except (ImportError, WindowsError, OSError):
