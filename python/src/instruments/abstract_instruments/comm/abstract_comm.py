@@ -30,6 +30,7 @@ from __future__ import division
 
 import abc
 import logging
+from instruments._moves import NullHandler
 
 ## CLASSES ####################################################################
 
@@ -46,7 +47,7 @@ class AbstractCommunicator(object):
         self._logger = logging.getLogger(type(self).__module__)
         
         # Ensure that there's at least something setup to receive logs.
-        self._logger.addHandler(logging.NullHandler())
+        self._logger.addHandler(NullHandler())
         
     ## FORMATTING METHODS ##
     

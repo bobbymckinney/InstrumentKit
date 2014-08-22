@@ -246,17 +246,4 @@ class ProxyList(object):
     def __len__(self):
         return len(self._valid_set)
 
-if sys.version_info[0] == 2 and sys.version_info[1] == 6:
 
-    import logging
-
-    class NullHandler(logging.Handler):
-        """
-        Emulates the Python 2.7 NullHandler when on Python 2.6.
-        """
-        def emit(self, record):
-            pass
-
-else:
-
-    from logging import NullHandler

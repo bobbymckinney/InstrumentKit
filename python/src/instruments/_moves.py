@@ -31,10 +31,32 @@ import flufl.enum
 
 if six.PY2:
     IntEnum = flufl.enum.IntEnum
+
+    import sys
+    major, minor, micro, releaselevel, serial = sys.version_info
+
+    if sys.version_info[0] == 2 and sys.version_info[1] == 6:
+
+        import logging
+
+        class NullHandler(logging.Handler):
+            """
+            Emulates the Python 2.7 NullHandler when on Python 2.6.
+            """
+            def emit(self, record):
+                pass
+
+    else:
+
+        from logging import NullHandler
+
 elif six.PY3:
-	# Define a subclass of Enum that does nothing but marks as being different,
-	# so that we can test in enum_property.
-	class IntEnum(flufl.enum.Enum):
-		pass
+    # Define a subclass of Enum that does nothing but marks as being different,
+    # so that we can test in enum_property.
+    class IntEnum(flufl.enum.Enum):
+        pass
+
+    from logging import NullHandler
+
 else:
     assert False, "this should never happen."

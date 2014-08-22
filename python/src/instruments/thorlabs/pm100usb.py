@@ -39,9 +39,10 @@ from collections import namedtuple
 
 ## LOGGING #####################################################################
 
+from instruments._moves import NullHandler
 import logging
 logger = logging.getLogger(__name__)
-logger.addHandler(logging.NullHandler())
+logger.addHandler(NullHandler())
 
 ## CLASSES #####################################################################
 

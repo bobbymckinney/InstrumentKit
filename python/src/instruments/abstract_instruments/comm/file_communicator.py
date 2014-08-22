@@ -31,7 +31,7 @@ import time
 from instruments.abstract_instruments.comm import AbstractCommunicator
 import os
 
-from instruments.util_fns import NullHandler
+from instruments._moves import NullHandler
 
 import logging
 logger = logging.getLogger(__name__)
