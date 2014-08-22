@@ -1,8 +1,8 @@
 language: python
 python:
-# FIXME: reenable once 2.6 support is added.
-#  - "2.6"
+  - "2.6"
   - "2.7"
+  - "3.3"
 # command to install dependencies
 install: "pip install -r python/requirements.txt"
 # command to run tests
