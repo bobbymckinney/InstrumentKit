@@ -99,10 +99,10 @@ class PM100USB(SCPIInstrument):
             
             # Normalize things to enums as appropriate.
             # We want flags to be a named tuple over bools.
-            self._flags = self._SensorFlags(**{
-                e.name: bool(e & self._flags)
+            self._flags = self._SensorFlags(**dict(
+                (e.name, bool(e & self._flags))
                 for e in self.SensorFlags
-            })
+            ))
             
         @property
         def name(self):
