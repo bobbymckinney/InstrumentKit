@@ -42,6 +42,8 @@ from instruments.abstract_instruments import (
 from instruments.generic_scpi import SCPIInstrument
 from instruments.util_fns import assume_units, ProxyList
 
+from six.moves import xrange
+
 ## CLASSES #####################################################################
 
 class _TekTDS224DataSource(OscilloscopeDataSource):

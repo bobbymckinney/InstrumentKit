@@ -71,6 +71,6 @@ def make_name_test(ins_class, name_cmd="*IDN?"):
     """
     def test():
         with expected_protocol(ins_class, name_cmd + "\n", "NAME\n") as ins:
-            assert ins.name == "NAME"
+            eq_(ins.name, "NAME")
     return test
     

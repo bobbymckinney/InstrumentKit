@@ -27,9 +27,13 @@
 import instruments as ik
 from instruments.tests import expected_protocol, make_name_test, unit_eq
 
-import cStringIO as StringIO
 import quantities as pq
 import numpy as np
+
+from six.moves import StringIO, xrange
+from six import b
+
+from instruments._moves import from_hex
 
 ## TESTS ######################################################################
 
@@ -78,7 +82,9 @@ def test_tektds224_data_source_read_waveform():
         ("DAT:SOU?\nDAT:SOU CH1\nDAT:ENC RIB\nDATA:WIDTH?\nCURVE?\n"
         "WFMP:CH1:YOF?\nWFMP:CH1:YMU?\nWFMP:CH1:YZE?\nWFMP:XZE?\nWFMP:XIN?\n"
         "WFMP:CH1:NR_P?\nDAT:SOU CH1\n"),
-        "CH1\n2\n#210"+"00000001000200030004".decode("hex")+"0\n1\n0\n0\n1\n5\n"
+        "CH1\n2\n#210" + 
+        from_hex("00000001000200030004") +
+        "0\n1\n0\n0\n1\n5\n"
     ) as tek:
         data = np.array([0,1,2,3,4])
         (x,y) = tek.channel[0].read_waveform()

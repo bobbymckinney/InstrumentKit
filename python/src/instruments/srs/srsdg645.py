@@ -29,6 +29,7 @@ from __future__ import division
 ## IMPORTS #####################################################################
 
 import six
+from six import b
 
 from time import time, sleep
 
@@ -73,7 +74,10 @@ class _SRSDG645Channel(object):
         For example, ``(SRSDG645.Channels.A, pq.Quantity(10, "ps"))``
         indicates a delay of 10 picoseconds from delay channel A.
         """
-        resp = self._ddg.query("DLAY?{}".format(int(self._chan))).split(",")
+        # We use the b() pseudoliteral here, provided by six,
+        # to avoid the problem that split searches for a bytearray
+        # inside a bytearray and not a str in a bytearray.
+        resp = self._ddg.query("DLAY?{}".format(int(self._chan))).split(b(","))
         return (SRSDG645.Channels(int(resp[0])), pq.Quantity(float(resp[1]), "s"))
     @delay.setter
     def delay(self, newval):

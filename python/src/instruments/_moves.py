@@ -50,6 +50,9 @@ if six.PY2:
 
         from logging import NullHandler
 
+    def from_hex(s):
+        return s.decode('hex')
+
 elif six.PY3:
     # Define a subclass of Enum that does nothing but marks as being different,
     # so that we can test in enum_property.
@@ -57,6 +60,9 @@ elif six.PY3:
         pass
 
     from logging import NullHandler
+
+    def from_hex(s):
+        return bytes.fromhex(s).decode('ascii')
 
 else:
     assert False, "this should never happen."

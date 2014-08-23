@@ -99,7 +99,11 @@ class LoopbackWrapper(io.IOBase, AbstractCommunicator):
                 while c != self._terminator:
                     c = self._stdin.read(1)
                     if c != self._terminator:
-                        result += c
+                        # Note that in Python 3, a str is a list
+                        # of Unicode character points, whereas we
+                        # want a result that is a list of bytes.
+                        # To convert, we use the encode method.
+                        result += c.encode('ascii')
                 return bytes(result)
             else:
                 raise ValueError('Must read a positive value of characters.')
