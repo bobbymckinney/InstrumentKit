@@ -79,7 +79,7 @@ class LoopbackWrapper(io.IOBase, AbstractCommunicator):
     
     def close(self):
         try:
-            self._conn.close()
+            self._stdin.close()
         except:
             pass
         
@@ -98,6 +98,8 @@ class LoopbackWrapper(io.IOBase, AbstractCommunicator):
                 c = 0
                 while c != self._terminator:
                     c = self._stdin.read(1)
+                    if c == '':
+                        break
                     if c != self._terminator:
                         # Note that in Python 3, a str is a list
                         # of Unicode character points, whereas we

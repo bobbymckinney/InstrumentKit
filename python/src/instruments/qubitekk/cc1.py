@@ -21,8 +21,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
-#
-# CC1 Class contributed by Catherine Holloway
+# CC1 Class contributed by Catherine Holloway.
 ##
 
 ## IMPORTS #####################################################################
@@ -31,48 +30,9 @@ import quantities as pq
 
 from instruments.abstract_instruments import Instrument
 from instruments.generic_scpi.scpi_instrument import SCPIInstrument
-from instruments.util_fns import ProxyList,assume_units
+from instruments.util_fns import ProxyList, assume_units, split_unit_str
 
 ## CLASSES #####################################################################
-
-class _CC1Channel(object):
-    """
-    Class representing a channel on the Qubitekk CC1.
-    
-    .. warning:: This class should NOT be manually created by the user. It is 
-        designed to be initialized by the `CC1` class.
-    """
-    def __init__(self, cc1, idx):
-        self._cc1 = cc1
-        self._idx = idx + 1
-        self._chan = "";
-        if(self._idx ==1):
-            self._chan = "C1"
-        if(self._idx ==2):
-            self._chan = "C2"
-        if(self._idx ==3):
-            self._chan = "CO"
-        self._count = 0
-        
-    ## PROPERTIES ##
-    
-    @property
-    def count(self):
-        """
-        Gets the counts of this channel.
-        
-        :rtype: `int`
-        """
-        count = self._cc1.query("COUN:"+self._chan+"?")
-        # FIXME: Does this property actually work? The try block seems wrong.
-        if not count is "Unknown command":
-            try:
-                count = int(count)
-                self.count = count
-                return self.count
-            except ValueError:
-                self.count = self.count
-        
 
 class CC1(SCPIInstrument):
     """
@@ -93,6 +53,79 @@ class CC1(SCPIInstrument):
         self.end_terminator = "\n"
         self.channel_count = 3
 
+    ## INNER CLASSES ##
+
+    class Channel(object):
+        """
+        Class representing a channel on the Qubitekk CC1.
+        """
+
+        __CHANNEL_NAMES = {
+            1: 'C1',
+            2: 'C2',
+            3: 'C0'
+        }
+
+        def __init__(self, cc1, idx):
+            self._cc1 = cc1
+            # Use zero-based indexing for the external API, but one-based
+            # for talking to the instrument.
+            self._idx = idx + 1
+            self._chan = self.__CHANNEL_NAMES[self._idx]
+            self._count = 0
+            
+        ## PROPERTIES ##
+        
+        @property
+        def count(self):
+            """
+            Gets the counts of this channel.
+            
+            :rtype: `int`
+            """
+            count = self._cc1.query("COUN:{0}?".format(self._chan))
+            # FIXME: Does this property actually work? The try block seems wrong.
+            try:
+                count = int(count)
+                self.count = count
+                return self.count
+            except ValueError:
+                self.count = self.count
+
+    ## METHOD OVERRIDES ##
+
+    def sendcmd(self, cmd):
+        # We override sendcmd here to check for the response
+        # "Unknown command", so that property factories not aware
+        # of this response can blindly call sendcmd() and rely on
+        # exception handling to get us the rest of the way there.
+        #
+        # Note that we call the superclass *query* and not *sendcmd*;
+        # this is so we can get the error message out!
+        resp = super(CC1, self).query(cmd)
+
+        if "Unknown command" == resp.strip():
+            raise IOError("CC1 reported that command {0} is unknown: {1}".format(
+                cmd, resp
+            ))
+
+
+    def query(self, cmd):
+        # We override query for the same reason as
+        # above.
+        resp = super(CC1, self).query(cmd)
+
+        if "Unknown command" == resp.strip():
+            raise IOError("CC1 reported that command {0} is unknown: {1}".format(
+                cmd, resp
+            ))
+
+        # If we survived, then the command was not marked as unknown.
+        # Something else may have gone wrong, but since we don't know that,
+        # we should return what we believe to be a successful response.
+        return resp
+            
+
     ## PROPERTIES ##
 
     @property
@@ -104,10 +137,8 @@ class CC1(SCPIInstrument):
             of units nanoseconds.
         :type: `~quantities.Quantity`
         """
-        response = self.query("WIND?")
-        if not response is "Unknown command":
-            response = response[:-3]
-            return float(response)*pq.ns
+        return pq.Quantity(*split_unit_str(self.query("DWEL?"), "s"))
+
     @window.setter
     def window(self, newval):
         newval_mag = assume_units(newval,pq.ns).rescale(pq.ns).magnitude
@@ -127,10 +158,8 @@ class CC1(SCPIInstrument):
             of units seconds.
         :type: `~quantities.Quantity`
         """
-        response = self.query("DWEL?")
-        if not response is "Unknown command":
-            response = response[:-2]
-            return float(response)*pq.s
+        return pq.Quantity(*split_unit_str(self.query("DWEL?"), "s"))
+
     @dwell_time.setter
     def dwell_time(self, newval):
         newval_mag = assume_units(newval,pq.s).rescale(pq.s).magnitude
@@ -150,9 +179,8 @@ class CC1(SCPIInstrument):
         :type: `bool`
         """
         response = self.query("GATE?")
-        if not response is "Unknown command":
-            response = int(response)
-            return True if response is 1 else False
+        response = int(response)
+        return True if response is 1 else False
     @gate_enable.setter
     def gate_enable(self, newval):
         if isinstance(newval, int):
@@ -178,9 +206,8 @@ class CC1(SCPIInstrument):
         :type: `bool`
         """
         response = self.query("COUN?")
-        if not response is "Unknown command":
-            response = int(response)
-            return True if response is 1 else False
+        response = int(response)
+        return True if response is 1 else False
     @count_enable.setter
     def count_enable(self, newval):
         if isinstance(newval, int):
@@ -206,10 +233,10 @@ class CC1(SCPIInstrument):
         >>> cc = ik.qubitekk.CC1.open_serial('COM8', 19200, timeout=1)
         >>> print cc.channel[0].count
         
-        :rtype: `_CC1Channel`
+        :rtype: `CC1.Channel`
         
         '''
-        return ProxyList(self, _CC1Channel, xrange(self.channel_count))
+        return ProxyList(self, CC1.Channel, xrange(self.channel_count))
     
     ## METHODS ##
     
@@ -217,5 +244,5 @@ class CC1(SCPIInstrument):
         """
         Clears the current total counts on the counters.
         """
-        self.query("CLEA")
+        self.sendcmd("CLEA")
 
